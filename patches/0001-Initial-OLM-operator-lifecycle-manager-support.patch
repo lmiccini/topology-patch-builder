@@ -288,7 +288,7 @@ new file mode 100644
 index 0000000..6be4b8a
 --- /dev/null
 +++ b/config/manifests/kustomization.yaml
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,12 @@
 +# These resources constitute the fully configured set of manifests
 +# used to generate the 'manifests/' directory in an OLM bundle.
 +# Required to use the hack/make-olm-bundle.sh script via
@@ -296,8 +296,12 @@ index 0000000..6be4b8a
 +resources:
 +- bases/messaging-topology-operator.clusterserviceversion.yaml
 +- ../manager
-+- ../crd
 +- ../rbac
++- ../crd
++- ../webhook
++
++# Override namespace to be empty - let OLM handle namespace placement
++namespace: ""
 diff --git a/hack/build-olm-bundle.sh b/hack/build-olm-bundle.sh
 new file mode 100755
 index 0000000..306dcf6
