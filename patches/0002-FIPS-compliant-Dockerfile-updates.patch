@@ -1,0 +1,59 @@
+commit b3b9113aaaef0b8f31e67a58cbf138dfd7a576a0
+Author: Luca Miccini <lmiccini@redhat.com>
+Date:   Sat Jul 26 10:00:39 2025 +0200
+
+    [PATCH 2/2] FIPS-compliant Dockerfile updates
+
+diff --git a/.prow_ci.env b/.prow_ci.env
+new file mode 100644
+index 0000000..ce722ac
+--- /dev/null
++++ b/.prow_ci.env
+@@ -0,0 +1,2 @@
++export USE_IMAGE_DIGESTS=true
++export FAIL_FIPS_CHECK=true
+diff --git a/Dockerfile b/Dockerfile
+index 0354b6e..8594821 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,7 +1,9 @@
+ # Build the manager binary
+-FROM --platform=$BUILDPLATFORM golang:1.21 as builder
++FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi9/go-toolset:1.21 as builder
+ 
+ WORKDIR /workspace
++
++USER root
+ # Copy the Go Modules manifests
+ COPY go.mod go.mod
+ COPY go.sum go.sum
+@@ -22,23 +24,16 @@ ARG TARGETARCH
+ ENV GOOS $TARGETOS
+ ENV GOARCH $TARGETARCH
+ 
+-# Build
+-RUN CGO_ENABLED=0 GO111MODULE=on go build -a -tags timetzdata -o manager main.go
+-
+-# ---------------------------------------
+-FROM alpine:latest as etc-builder
++RUN CGO_ENABLED=1 GO111MODULE=on go build -a -tags timetzdata -o manager main.go
+ 
++# ---
++FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
++WORKDIR /
++COPY --from=builder /workspace/manager .
+ RUN echo "messaging-topology-operator:x:1001:" > /etc/group && \
+     echo "messaging-topology-operator:x:1001:1001::/home/messaging-topology-operator:/usr/sbin/nologin" > /etc/passwd
+ 
+-RUN apk add -U --no-cache ca-certificates
+-
+-# ---------------------------------------
+-FROM scratch
+-WORKDIR /
+-COPY --from=builder /workspace/manager .
+-COPY --from=etc-builder /etc/passwd /etc/group /etc/
+-COPY --from=etc-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+ USER 1001:1001
+ 
++
+ ENTRYPOINT ["/manager"]
