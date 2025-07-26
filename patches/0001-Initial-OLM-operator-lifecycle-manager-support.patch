@@ -295,9 +295,9 @@ index 0000000..6be4b8a
 +# operator-sdk.
 +resources:
 +- bases/messaging-topology-operator.clusterserviceversion.yaml
++- ../manager
 +- ../crd
 +- ../rbac
-+- ../manager
 diff --git a/hack/build-olm-bundle.sh b/hack/build-olm-bundle.sh
 new file mode 100755
 index 0000000..306dcf6
