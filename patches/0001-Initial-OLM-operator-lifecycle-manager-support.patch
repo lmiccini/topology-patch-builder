@@ -2,7 +2,7 @@ commit 31c2facbd10abf9b71debb4225377617cd191c35
 Author: Luca Miccini <lmiccini@redhat.com>
 Date:   Sat Jul 26 09:30:30 2025 +0200
 
-    [PATCH 1/2] Initial OLM (operator lifecycle manager) support
+    [PATCH 1/3] Initial OLM (operator lifecycle manager) support
 
 diff --git a/PROJECT b/PROJECT
 index 634e60e..ca592b3 100644
