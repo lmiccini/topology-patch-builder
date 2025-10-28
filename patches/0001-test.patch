@@ -1,4 +1,4 @@
-commit 067cb96de93899a91ff26153edfeedf967aaeda6
+commit 30cfb159180dd76e02068c3a74237b36bc7fb4cb
 Author: Luca Miccini <lmiccini@redhat.com>
 Date:   Mon Oct 27 17:28:37 2025 +0100
 
@@ -182,7 +182,7 @@ index 634e60e..ca592b3 100644
    version: v1beta1
 diff --git a/bundle.Dockerfile b/bundle.Dockerfile
 new file mode 100644
-index 0000000..03cefa4
+index 0000000..3533795
 --- /dev/null
 +++ b/bundle.Dockerfile
 @@ -0,0 +1,15 @@
@@ -196,23 +196,24 @@ index 0000000..03cefa4
 +LABEL operators.operatorframework.io.bundle.channels.v1=alpha
 +LABEL operators.operatorframework.io.metrics.builder=operator-sdk-v1.31.0
 +LABEL operators.operatorframework.io.metrics.mediatype.v1=metrics+v1
-+LABEL operators.operatorframework.io.metrics.project_layout=unknown
++LABEL operators.operatorframework.io.metrics.project_layout=go.kubebuilder.io/v3
 +
 +# Copy files to locations specified by labels.
-+COPY ../../../bundle/manifests /manifests/
-+COPY ../../../bundle/metadata /metadata/
++COPY bundle/manifests /manifests/
++COPY bundle/metadata /metadata/
 diff --git a/bundle/manifests/messaging-topology-operator.clusterserviceversion.yaml b/bundle/manifests/messaging-topology-operator.clusterserviceversion.yaml
 new file mode 100644
-index 0000000..3e469ba
+index 0000000..ad4387e
 --- /dev/null
 +++ b/bundle/manifests/messaging-topology-operator.clusterserviceversion.yaml
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,581 @@
 +apiVersion: operators.coreos.com/v1alpha1
 +kind: ClusterServiceVersion
 +metadata:
 +  annotations:
 +    alm-examples: '[]'
 +    capabilities: Basic Install
++    createdAt: "2025-10-28T13:44:17Z"
 +    features.operators.openshift.io/disconnected: "true"
 +    features.operators.openshift.io/fips-compliant: "true"
 +    features.operators.openshift.io/proxy-aware: "false"
@@ -220,269 +221,573 @@ index 0000000..3e469ba
 +    features.operators.openshift.io/token-auth-aws: "false"
 +    features.operators.openshift.io/token-auth-azure: "false"
 +    features.operators.openshift.io/token-auth-gcp: "false"
++    operators.operatorframework.io/builder: operator-sdk-v1.31.0
 +    operators.operatorframework.io/operator-type: non-standalone
++    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
 +  name: messaging-topology-operator.v0.0.1
 +  namespace: placeholder
 +spec:
 +  apiservicedefinitions: {}
 +  customresourcedefinitions:
 +    owned:
-+    - description: Binding is the Schema for the bindings API
-+      displayName: Binding
-+      kind: Binding
-+      name: bindings.rabbitmq.com
-+      version: v1beta1
-+    - description: Exchange is the Schema for the exchanges API
-+      displayName: Exchange
-+      kind: Exchange
-+      name: exchanges.rabbitmq.com
-+      version: v1beta1
-+    - description: Federation is the Schema for the federations API
-+      displayName: Federation
-+      kind: Federation
-+      name: federations.rabbitmq.com
-+      version: v1beta1
-+    - description: Permission is the Schema for the permissions API
-+      displayName: Permission
-+      kind: Permission
-+      name: permissions.rabbitmq.com
-+      version: v1beta1
-+    - description: Policy is the Schema for the policies API
-+      displayName: Policy
-+      kind: Policy
-+      name: policies.rabbitmq.com
-+      version: v1beta1
-+    - description: Queue is the Schema for the queues API
-+      displayName: Queue
-+      kind: Queue
-+      name: queues.rabbitmq.com
-+      version: v1beta1
-+    - description: 'SchemaReplication is the Schema for the schemareplications API
-+        This feature requires Tanzu RabbitMQ with schema replication plugin. For more
-+        information, see: https://tanzu.vmware.com/rabbitmq and https://www.rabbitmq.com/definitions-standby.html.'
-+      displayName: Schema Replication
-+      kind: SchemaReplication
-+      name: schemareplications.rabbitmq.com
-+      version: v1beta1
-+    - description: Shovel is the Schema for the shovels API
-+      displayName: Shovel
-+      kind: Shovel
-+      name: shovels.rabbitmq.com
-+      version: v1beta1
-+    - description: SuperStream is the Schema for the queues API
-+      displayName: Super Stream
-+      kind: SuperStream
-+      name: superstreams.rabbitmq.com
-+      version: v1alpha1
-+    - description: TopicPermission is the Schema for the topicpermissions API
-+      displayName: Topic Permission
-+      kind: TopicPermission
-+      name: topicpermissions.rabbitmq.com
-+      version: v1beta1
-+    - description: User is the Schema for the users API.
-+      displayName: User
-+      kind: User
-+      name: users.rabbitmq.com
-+      version: v1beta1
-+    - description: Vhost is the Schema for the vhosts API
-+      displayName: Vhost
-+      kind: Vhost
-+      name: vhosts.rabbitmq.com
-+      version: v1beta1
++      - description: Binding is the Schema for the bindings API
++        displayName: Binding
++        kind: Binding
++        name: bindings.rabbitmq.com
++        version: v1beta1
++      - description: Exchange is the Schema for the exchanges API
++        displayName: Exchange
++        kind: Exchange
++        name: exchanges.rabbitmq.com
++        version: v1beta1
++      - description: Federation is the Schema for the federations API
++        displayName: Federation
++        kind: Federation
++        name: federations.rabbitmq.com
++        version: v1beta1
++      - description: OperatorPolicy is the Schema for the operator policies API
++        displayName: Operator Policy
++        kind: OperatorPolicy
++        name: operatorpolicies.rabbitmq.com
++        version: v1beta1
++      - description: Permission is the Schema for the permissions API
++        displayName: Permission
++        kind: Permission
++        name: permissions.rabbitmq.com
++        version: v1beta1
++      - description: Policy is the Schema for the policies API
++        displayName: Policy
++        kind: Policy
++        name: policies.rabbitmq.com
++        version: v1beta1
++      - description: Queue is the Schema for the queues API
++        displayName: Queue
++        kind: Queue
++        name: queues.rabbitmq.com
++        version: v1beta1
++      - description: 'SchemaReplication is the Schema for the schemareplications API This feature requires Tanzu RabbitMQ with schema replication plugin. For more information, see: https://tanzu.vmware.com/rabbitmq and https://www.rabbitmq.com/definitions-standby.html.'
++        displayName: Schema Replication
++        kind: SchemaReplication
++        name: schemareplications.rabbitmq.com
++        version: v1beta1
++      - description: Shovel is the Schema for the shovels API
++        displayName: Shovel
++        kind: Shovel
++        name: shovels.rabbitmq.com
++        version: v1beta1
++      - description: SuperStream is the Schema for the queues API
++        displayName: Super Stream
++        kind: SuperStream
++        name: superstreams.rabbitmq.com
++        version: v1alpha1
++      - description: TopicPermission is the Schema for the topicpermissions API
++        displayName: Topic Permission
++        kind: TopicPermission
++        name: topicpermissions.rabbitmq.com
++        version: v1beta1
++      - description: User is the Schema for the users API.
++        displayName: User
++        kind: User
++        name: users.rabbitmq.com
++        version: v1beta1
++      - description: Vhost is the Schema for the vhosts API
++        displayName: Vhost
++        kind: Vhost
++        name: vhosts.rabbitmq.com
++        version: v1beta1
 +  description: Messaging Topology Operator
 +  displayName: Messaging Topology Operator
 +  install:
 +    spec:
 +      clusterPermissions:
-+      - rules:
-+        - apiGroups:
-+          - ""
-+          resources:
-+          - events
-+          verbs:
-+          - create
-+          - patch
-+        - apiGroups:
-+          - ""
-+          resources:
-+          - secrets
-+          verbs:
-+          - get
-+          - list
-+          - watch
-+        - apiGroups:
-+          - rabbitmq.com
-+          resources:
-+          - bindings
-+          - exchanges
-+          - federations
-+          - operatorpolicies
-+          - permissions
-+          - policies
-+          - queues
-+          - schemareplications
-+          - shovels
-+          - superstreams
-+          - topicpermissions
-+          - users
-+          - vhosts
-+          verbs:
-+          - create
-+          - delete
-+          - get
-+          - list
-+          - patch
-+          - update
-+          - watch
-+        - apiGroups:
-+          - rabbitmq.com
-+          resources:
-+          - bindings/finalizers
-+          - exchanges/finalizers
-+          - federations/finalizers
-+          - operatorpolicies/finalizers
-+          - permissions/finalizers
-+          - policies/finalizers
-+          - queues/finalizers
-+          - schemareplications/finalizers
-+          - shovels/finalizers
-+          - superstreams/finalizers
-+          - topicpermissions/finalizers
-+          - users/finalizers
-+          - vhosts/finalizers
-+          verbs:
-+          - update
-+        - apiGroups:
-+          - rabbitmq.com
-+          resources:
-+          - bindings/status
-+          - exchanges/status
-+          - federations/status
-+          - operatorpolicies/status
-+          - permissions/status
-+          - policies/status
-+          - queues/status
-+          - schemareplications/status
-+          - shovels/status
-+          - superstreams/status
-+          - topicpermissions/status
-+          - users/status
-+          - vhosts/status
-+          verbs:
-+          - get
-+          - patch
-+          - update
-+        serviceAccountName: messaging-topology-operator
++        - rules:
++            - apiGroups:
++                - ""
++              resources:
++                - events
++              verbs:
++                - create
++                - get
++                - patch
++            - apiGroups:
++                - ""
++              resources:
++                - secrets
++              verbs:
++                - create
++                - get
++                - list
++                - watch
++            - apiGroups:
++                - ""
++              resources:
++                - services
++              verbs:
++                - get
++                - list
++                - watch
++            - apiGroups:
++                - rabbitmq.com
++              resources:
++                - bindings
++                - exchanges
++                - federations
++                - operatorpolicies
++                - permissions
++                - policies
++                - queues
++                - schemareplications
++                - shovels
++                - superstreams
++                - topicpermissions
++                - users
++                - vhosts
++              verbs:
++                - create
++                - delete
++                - get
++                - list
++                - patch
++                - update
++                - watch
++            - apiGroups:
++                - rabbitmq.com
++              resources:
++                - bindings/finalizers
++                - exchanges/finalizers
++                - federations/finalizers
++                - operatorpolicies/finalizers
++                - permissions/finalizers
++                - policies/finalizers
++                - queues/finalizers
++                - schemareplications/finalizers
++                - shovels/finalizers
++                - superstreams/finalizers
++                - topicpermissions/finalizers
++                - users/finalizers
++                - vhosts/finalizers
++              verbs:
++                - update
++            - apiGroups:
++                - rabbitmq.com
++              resources:
++                - bindings/status
++                - exchanges/status
++                - federations/status
++                - operatorpolicies/status
++                - permissions/status
++                - policies/status
++                - queues/status
++                - schemareplications/status
++                - shovels/status
++                - superstreams/status
++                - topicpermissions/status
++                - users/status
++                - vhosts/status
++              verbs:
++                - get
++                - patch
++                - update
++            - apiGroups:
++                - rabbitmq.com
++              resources:
++                - rabbitmqclusters
++              verbs:
++                - get
++                - list
++                - watch
++            - apiGroups:
++                - rabbitmq.com
++              resources:
++                - rabbitmqclusters/status
++              verbs:
++                - get
++          serviceAccountName: messaging-topology-operator
 +      deployments:
-+      - label:
-+          app.kubernetes.io/component: rabbitmq-operator
-+          app.kubernetes.io/name: messaging-topology-operator
-+          app.kubernetes.io/part-of: rabbitmq
-+        name: messaging-topology-operator
-+        spec:
-+          replicas: 1
-+          selector:
-+            matchLabels:
-+              app.kubernetes.io/name: messaging-topology-operator
-+          strategy: {}
-+          template:
-+            metadata:
-+              labels:
-+                app.kubernetes.io/component: rabbitmq-operator
++        - label:
++            app.kubernetes.io/component: rabbitmq-operator
++            app.kubernetes.io/name: messaging-topology-operator
++            app.kubernetes.io/part-of: rabbitmq
++          name: messaging-topology-operator
++          spec:
++            replicas: 1
++            selector:
++              matchLabels:
 +                app.kubernetes.io/name: messaging-topology-operator
-+                app.kubernetes.io/part-of: rabbitmq
-+            spec:
-+              containers:
-+              - command:
-+                - /manager
-+                env:
-+                - name: OPERATOR_NAMESPACE
-+                  valueFrom:
-+                    fieldRef:
-+                      fieldPath: metadata.namespace
-+                image: controller:latest
-+                imagePullPolicy: Always
-+                name: manager
-+                resources:
-+                  limits:
-+                    cpu: 300m
-+                    memory: 500Mi
-+                  requests:
-+                    cpu: 100m
-+                    memory: 100Mi
-+                securityContext:
-+                  allowPrivilegeEscalation: false
-+                  capabilities:
-+                    drop:
-+                    - All
-+                  runAsNonRoot: true
-+                  seccompProfile:
-+                    type: RuntimeDefault
-+                volumeMounts:
-+                - mountPath: /etc/ssl/certs/rabbitmq-ca.crt
-+                  name: rabbitmq-ca
-+                  subPath: ca.crt
-+              serviceAccountName: messaging-topology-operator
-+              terminationGracePeriodSeconds: 10
-+              volumes:
-+              - name: rabbitmq-ca
-+                secret:
-+                  defaultMode: 420
-+                  secretName: rabbitmq-ca
++            strategy: {}
++            template:
++              metadata:
++                labels:
++                  app.kubernetes.io/component: rabbitmq-operator
++                  app.kubernetes.io/name: messaging-topology-operator
++                  app.kubernetes.io/part-of: rabbitmq
++              spec:
++                containers:
++                  - command:
++                      - /manager
++                    env:
++                      - name: OPERATOR_NAMESPACE
++                        valueFrom:
++                          fieldRef:
++                            fieldPath: metadata.namespace
++                    image: rabbitmqoperator/messaging-topology-operator-dev@sha256:0c8f8378eebba95372aed111a12e8ea6b36c34f091b8d2c7eb3da30eedcd6224
++                    imagePullPolicy: Always
++                    name: manager
++                    ports:
++                      - containerPort: 9443
++                        name: webhook-server
++                        protocol: TCP
++                    resources:
++                      limits:
++                        cpu: 300m
++                        memory: 500Mi
++                      requests:
++                        cpu: 100m
++                        memory: 100Mi
++                    securityContext:
++                      allowPrivilegeEscalation: false
++                      capabilities:
++                        drop:
++                          - All
++                      runAsNonRoot: true
++                      seccompProfile:
++                        type: RuntimeDefault
++                    volumeMounts:
++                      - mountPath: /tmp/k8s-webhook-server/serving-certs
++                        name: cert
++                        readOnly: true
++                      - mountPath: /etc/ssl/certs/rabbitmq-ca.crt
++                        name: rabbitmq-ca
++                        subPath: ca.crt
++                serviceAccountName: messaging-topology-operator
++                terminationGracePeriodSeconds: 10
++                volumes:
++                  - name: cert
++                    secret:
++                      defaultMode: 420
++                      secretName: webhook-server-cert
++                  - name: rabbitmq-ca
++                    secret:
++                      defaultMode: 420
++                      secretName: rabbitmq-ca
 +      permissions:
-+      - rules:
-+        - apiGroups:
-+          - ""
-+          resources:
-+          - configmaps
-+          verbs:
-+          - get
-+          - list
-+          - watch
-+          - create
-+          - update
-+          - patch
-+          - delete
-+        - apiGroups:
-+          - coordination.k8s.io
-+          resources:
-+          - leases
-+          verbs:
-+          - get
-+          - list
-+          - watch
-+          - create
-+          - update
-+          - patch
-+          - delete
-+        - apiGroups:
-+          - ""
-+          resources:
-+          - events
-+          verbs:
-+          - create
-+          - patch
-+        serviceAccountName: messaging-topology-operator
++        - rules:
++            - apiGroups:
++                - coordination.k8s.io
++              resources:
++                - leases
++              verbs:
++                - get
++                - list
++                - watch
++                - create
++                - update
++                - patch
++                - delete
++            - apiGroups:
++                - ""
++              resources:
++                - events
++              verbs:
++                - create
++            - apiGroups:
++                - ""
++              resources:
++                - configmaps
++              verbs:
++                - get
++                - list
++                - watch
++                - create
++                - update
++                - patch
++                - delete
++          serviceAccountName: messaging-topology-operator
 +    strategy: deployment
 +  installModes:
-+  - supported: true
-+    type: OwnNamespace
-+  - supported: true
-+    type: SingleNamespace
-+  - supported: false
-+    type: MultiNamespace
-+  - supported: true
-+    type: AllNamespaces
++    - supported: true
++      type: OwnNamespace
++    - supported: true
++      type: SingleNamespace
++    - supported: false
++      type: MultiNamespace
++    - supported: true
++      type: AllNamespaces
 +  keywords:
-+  - rabbitmq
++    - rabbitmq
 +  links:
-+  - name: Messaging Topology Operator
-+    url: https://github.com/rabbitmq/messaging-topology-operator
++    - name: Messaging Topology Operator
++      url: https://github.com/rabbitmq/messaging-topology-operator
 +  maturity: alpha
 +  provider:
 +    name: RabbitMQ
 +    url: https://rabbitmq.com
++  relatedImages:
++    - image: rabbitmqoperator/messaging-topology-operator-dev@sha256:0c8f8378eebba95372aed111a12e8ea6b36c34f091b8d2c7eb3da30eedcd6224
++      name: manager
 +  version: 0.0.1
++  webhookdefinitions:
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vbinding.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - bindings
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-binding
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vexchange.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - exchanges
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-exchange
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vfederation.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - federations
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-federation
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: voperatorpolicy.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - operatorpolicies
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-operatorpolicy
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vpermission.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - permissions
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-permission
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vpolicy.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - policies
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-policy
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vqueue.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - queues
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-queue
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vschemareplication.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - schemareplications
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-schemareplication
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vshovel.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - shovels
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-shovel
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vsuperstream.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1alpha1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - superstreams
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1alpha1-superstream
++    - admissionReviewVersions:
++        - v1
++        - v1beta1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vtopicpermission.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - topicpermissions
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-topicpermission
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vuser.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - users
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-user
++    - admissionReviewVersions:
++        - v1
++      containerPort: 443
++      deploymentName: messaging-topology-operator
++      failurePolicy: Fail
++      generateName: vvhost.kb.io
++      rules:
++        - apiGroups:
++            - rabbitmq.com
++          apiVersions:
++            - v1beta1
++          operations:
++            - CREATE
++            - UPDATE
++          resources:
++            - vhosts
++      sideEffects: None
++      targetPort: 9443
++      type: ValidatingAdmissionWebhook
++      webhookPath: /validate-rabbitmq-com-v1beta1-vhost
 diff --git a/bundle/manifests/rabbitmq.com_bindings.yaml b/bundle/manifests/rabbitmq.com_bindings.yaml
 new file mode 100644
 index 0000000..e1d2af5
@@ -2844,7 +3149,7 @@ index 0000000..fbff0a9
 +  loadBalancer: {}
 diff --git a/bundle/metadata/annotations.yaml b/bundle/metadata/annotations.yaml
 new file mode 100644
-index 0000000..f582707
+index 0000000..e70ce0a
 --- /dev/null
 +++ b/bundle/metadata/annotations.yaml
 @@ -0,0 +1,10 @@
@@ -2857,7 +3162,7 @@ index 0000000..f582707
 +  operators.operatorframework.io.bundle.channels.v1: alpha
 +  operators.operatorframework.io.metrics.builder: operator-sdk-v1.31.0
 +  operators.operatorframework.io.metrics.mediatype.v1: metrics+v1
-+  operators.operatorframework.io.metrics.project_layout: unknown
++  operators.operatorframework.io.metrics.project_layout: go.kubebuilder.io/v3
 diff --git a/config/crd/bases/rabbitmq.com_bindings.yaml b/config/crd/bases/rabbitmq.com_bindings.yaml
 index 235050a..1d2a08f 100644
 --- a/config/crd/bases/rabbitmq.com_bindings.yaml
@@ -5872,10 +6177,10 @@ index 37faa84..a36c16e 100644
        terminationGracePeriodSeconds: 10
 diff --git a/config/manifests/bases/messaging-topology-operator.clusterserviceversion.yaml b/config/manifests/bases/messaging-topology-operator.clusterserviceversion.yaml
 new file mode 100644
-index 0000000..3e469ba
+index 0000000..17ca1ac
 --- /dev/null
 +++ b/config/manifests/bases/messaging-topology-operator.clusterserviceversion.yaml
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,281 @@
 +apiVersion: operators.coreos.com/v1alpha1
 +kind: ClusterServiceVersion
 +metadata:
@@ -5896,6 +6201,11 @@ index 0000000..3e469ba
 +  apiservicedefinitions: {}
 +  customresourcedefinitions:
 +    owned:
++    - description: OperatorPolicy is the Schema for the operator policies API
++      displayName: Operator Policy
++      kind: OperatorPolicy
++      name: operatorpolicies.rabbitmq.com
++      version: v1beta1
 +    - description: Binding is the Schema for the bindings API
 +      displayName: Binding
 +      kind: Binding
@@ -6154,10 +6464,10 @@ index 0000000..3e469ba
 +  version: 0.0.1
 diff --git a/config/manifests/kustomization.yaml b/config/manifests/kustomization.yaml
 new file mode 100644
-index 0000000..c09cbb7
+index 0000000..c50c97a
 --- /dev/null
 +++ b/config/manifests/kustomization.yaml
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,8 @@
 +# These resources constitute the fully configured set of manifests
 +# used to generate the 'manifests/' directory in an OLM bundle.
 +# Required to use the hack/make-olm-bundle.sh script via
@@ -6165,7 +6475,6 @@ index 0000000..c09cbb7
 +resources:
 +- bases/messaging-topology-operator.clusterserviceversion.yaml
 +- ../default/base
-+- ../crd
 +- ../rbac
 diff --git a/config/rbac/role.yaml b/config/rbac/role.yaml
 index 5aa922f..7600d48 100644
